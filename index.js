@@ -43,15 +43,27 @@ io.on('connection', function(socket) {
     });
   });
 
-    socket.on('disconnect', function() {
-      if (addedUser) {
-        --numUsers;
-        socket.broadcast.emit('user left', {
-          username: socket.username,
-          numUsers: numUsers
-        });
-      }
+  socket.on('disconnect', function() {
+    if (addedUser) {
+      --numUsers;
+      socket.broadcast.emit('user left', {
+        username: socket.username,
+        numUsers: numUsers
+      });
+    }
+  });
+
+  socket.on('typing', function() {
+    socket.broadcast.emit('typing', {
+      username: socket.username
     });
+  });
+
+  socket.on('stop typing', function() {
+    socket.broadcast.emit('stop typing', {
+      username: socket.username
+    });
+  });
 
 
 });

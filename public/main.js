@@ -1,5 +1,6 @@
 $(function() {
   var FADE_TIME = 150;
+  var TYPING_TIMER_LENGTH = 400;
   var COLORS = [
     '#e21400', '#91580f', '#f8a700', '#f78b00',
     '#58dc00', '#287b00', '#a8f07a', '#4ae8c4',
@@ -125,6 +126,35 @@ $(function() {
     });
   }
 
+  function addChatTyping(data) {
+    data.typing = true;
+    data.message = 'is typing';
+    addChatMessage(data);
+  }
+
+  function updateTyping() {
+    if (connected) {
+      if(!typing) {
+        typing = true;
+        socket.emit('typing');
+      }
+      lastTypingTime = (new Date()).getTime();
+      setTimeout(function() {
+        var typingTimer = (new Date()).getTime();
+        var timeDiff = typingTimer = lastTypingTime;
+        if (timeDiff >= TYPING_TIMER_LENGTH && typing) {
+          socket.io('stop typing');
+          typing = false;
+        }
+      }, TYPING_TIMER_LENGTH)
+    }
+  }
+
+  function removeChatTyping(data) {
+    getTypingMessages(data).fadeOut(function() {
+      $(this).remove();
+    });
+  }
 
   $window.keydown(function(event) {
     if (!(event.ctrlKey || event.metaKey || event.altKey)) {
@@ -140,6 +170,10 @@ $(function() {
       }
     }
   });
+
+  $inputMessage.on('input', function() {
+    updateTyping();
+  })
 
   $loginPage.click(function() {
     $currentInput.focus();
@@ -169,6 +203,14 @@ $(function() {
   socket.on('user left', function(data) {
     log(data.username + ' left');
     addParticipantsMessage(data);
-  })
+  });
+
+  socket.on('typing', function(data) {
+    addChatTyping(data);
+  });
+  socket.on('stop typing', function(data) {
+    removeChatTyping(data);
+  });
+
 
 });
