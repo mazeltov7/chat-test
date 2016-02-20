@@ -143,7 +143,7 @@ $(function() {
         var typingTimer = (new Date()).getTime();
         var timeDiff = typingTimer = lastTypingTime;
         if (timeDiff >= TYPING_TIMER_LENGTH && typing) {
-          socket.io('stop typing');
+          socket.emit('stop typing');
           typing = false;
         }
       }, TYPING_TIMER_LENGTH)
